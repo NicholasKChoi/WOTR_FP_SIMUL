@@ -1,16 +1,22 @@
 package main
 
+import "strings"
+
 type HuntTile struct {
 	Dmg  int
 	Name string
 }
 
-func (h *HuntTile) GetDmg() int {
+func (h *HuntTile) GetDmg(numHits int) int {
 	if h.Name == "eye" {
-		return 99999
+		return numHits
 	} else {
 		return h.Dmg
 	}
+}
+
+func (h *HuntTile) IsReveal() bool {
+	return h.Name == "eye" || strings.HasSuffix(h.Name, "r")
 }
 
 func (h *HuntTile) Init(dmg int, name string) {
