@@ -7,6 +7,7 @@
  - Re-learn / Re-Familiarize myself with golang
  - Build something useful to myself
  - Code more
+ - add something more significant to github profile
 
 ### Technical
  - Add something to github
@@ -20,6 +21,7 @@
 
 ### Technical
  - Building a UI / UX experience
+ - Writing excellent code
 
 # Plan
 ## Values
