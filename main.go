@@ -18,7 +18,7 @@ var (
 	corrR CorruptionInflictedTable
 	reavR RevealsTable
 
-	CHECKS = []VictoryChecker{&FrodoRingChecker{}, &ShadowRingChecker{}}
+	CHECKS = []VictoryChecker{&ShadowRingChecker{}, &FrodoRingChecker{}}
 
 	// TODO: only put global settings here
 
