@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"math/rand"
 	"time"
+
+	"github.com/davecgh/go-spew/spew"
 )
 
 var (
@@ -11,7 +13,9 @@ var (
 	corrR CorruptionInflictedTable
 	reavR RevealsTable
 
-	huntPool []*HuntTile
+	huntPool             []*HuntTile
+	isFrodoRevealed      bool
+	currentCorruptionLvl int
 )
 
 // hunt pool stuff
@@ -26,16 +30,23 @@ func InitDefaultHuntPool() []*HuntTile {
 	return h
 }
 
+/// Does the following
+/// 1. removes a tile from the hunt pool
+/// 2. calculates damage based on the tile type
+/// 3. determines if frodo is revealed based on tile type
 func DoHunt(eyes int) {
 	var tile *HuntTile
 	if len(huntPool) == 0 {
 		fmt.Println("Hunt Pool exhausted!")
 	} else {
+		// randomize the hunt drawing at the time of drawing the tile
 		tile, huntPool = huntPool[0], huntPool[1:]
 		fmt.Printf("%v doing %d dmg and IsReveal %t\n",
 			tile,
 			tile.GetDmg(eyes),
 			tile.IsReveal())
+		isFrodoRevealed = tile.IsReveal()
+		currentCorruptionLvl += tile.GetDmg(eyes)
 	}
 }
 
@@ -44,5 +55,10 @@ func main() {
 	huntPool = InitDefaultHuntPool()
 	for len(huntPool) > 0 {
 		DoHunt(2)
+		fmt.Printf("After that isFrodoRevealed = %t and dmg is at %d\n",
+			isFrodoRevealed,
+			currentCorruptionLvl)
+		isFrodoRevealed = false
 	}
+	spew.Dump(huntPool)
 }
