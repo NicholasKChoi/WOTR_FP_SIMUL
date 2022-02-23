@@ -7,3 +7,7 @@
 ## for each loop in golang
 ### https://stackoverflow.com/questions/7782411/is-there-a-foreach-loop-in-go
 * for index, element := range someSlice (duh)
+
+## how to break outer loop golang
+### https://stackoverflow.com/questions/51996175/how-to-break-out-of-nested-loops-in-go
+* use labels, but this usually means your code should be refactored
