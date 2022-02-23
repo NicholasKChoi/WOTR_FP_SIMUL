@@ -8,14 +8,26 @@ import (
 	"github.com/davecgh/go-spew/spew"
 )
 
+const (
+	MORDOR_POSITION = 5
+	MAX_CORRUPTION  = 12
+)
+
 var (
 	charR CharDiceNeededTable
 	corrR CorruptionInflictedTable
 	reavR RevealsTable
 
-	huntPool             []*HuntTile
-	isFrodoRevealed      bool
-	currentCorruptionLvl int
+	CHECKS = []VictoryChecker{&FrodoRingChecker{}, &ShadowRingChecker{}}
+
+	// TODO: only put global settings here
+
+	// TODO: move these to a gamestate structure that is in the mainloop
+	HuntPool           []*HuntTile
+	IsFrodoRevealed    bool
+	CurrMovesUsed      int
+	CurrCorruptionLvl  int
+	CurrMordorPosition int
 )
 
 // hunt pool stuff
@@ -34,31 +46,86 @@ func InitDefaultHuntPool() []*HuntTile {
 /// 1. removes a tile from the hunt pool
 /// 2. calculates damage based on the tile type
 /// 3. determines if frodo is revealed based on tile type
-func DoHunt(eyes int) {
-	var tile *HuntTile
+func DoHunt(eyes int, huntPool []*HuntTile) (h []*HuntTile, t *HuntTile) {
 	if len(huntPool) == 0 {
 		fmt.Println("Hunt Pool exhausted!")
+		h = huntPool
 	} else {
 		// randomize the hunt drawing at the time of drawing the tile
-		tile, huntPool = huntPool[0], huntPool[1:]
+		t, h = huntPool[0], huntPool[1:]
 		fmt.Printf("%v doing %d dmg and IsReveal %t\n",
-			tile,
-			tile.GetDmg(eyes),
-			tile.IsReveal())
-		isFrodoRevealed = tile.IsReveal()
-		currentCorruptionLvl += tile.GetDmg(eyes)
+			t,
+			t.GetDmg(eyes),
+			t.IsReveal())
 	}
+	return
+}
+
+// order of victory conditions matters
+/// 1. if frodo > 12 corruption, shadow wins
+/// 2. if frodo is at mount doom, frodo wins
+/// 3. if shadow has 10 victory points, shadow wins
+/// 4. if frodo has 4 victory points, frodo wins
+type VictoryChecker interface {
+	IsVictory(currMP int, currCorr int) bool
+	PrintVictoryMessage()
+}
+
+type FrodoRingChecker struct{}
+type ShadowRingChecker struct{}
+
+func (*FrodoRingChecker) IsVictory(currMP int, currCorr int) bool {
+	return currMP >= MORDOR_POSITION
+}
+
+func (*FrodoRingChecker) PrintVictoryMessage() {
+	fmt.Println("FRODO DUNKS THE RING")
+}
+
+func (*ShadowRingChecker) IsVictory(currMP int, currCorr int) bool {
+	return currCorr >= MAX_CORRUPTION
+}
+
+func (*ShadowRingChecker) PrintVictoryMessage() {
+	fmt.Println("SAURON GETS THE RING")
+}
+
+func isGameOver(currMP int, currCorr int) bool {
+	for _, checker := range CHECKS {
+		if checker.IsVictory(CurrMordorPosition, CurrCorruptionLvl) {
+			checker.PrintVictoryMessage()
+			return true
+		}
+	}
+	return false
 }
 
 func main() {
+
+	// todo roll for number of eyes
+	numEyes := 2
 	fmt.Println("Hello world")
-	huntPool = InitDefaultHuntPool()
-	for len(huntPool) > 0 {
-		DoHunt(2)
+	HuntPool = InitDefaultHuntPool()
+	for len(HuntPool) > 0 {
+		CurrMovesUsed++
+		if IsFrodoRevealed {
+			fmt.Println("Frodo hid! Sneaky hobbits!")
+			IsFrodoRevealed = false
+		} else {
+			fmt.Println("Frodo moved! HUNT HIM DOWN!!")
+			var drawnTile *HuntTile
+			HuntPool, drawnTile = DoHunt(numEyes, HuntPool)
+			IsFrodoRevealed = drawnTile.IsReveal()
+			CurrCorruptionLvl += drawnTile.GetDmg(numEyes)
+			CurrMordorPosition++
+		}
 		fmt.Printf("After that isFrodoRevealed = %t and dmg is at %d\n",
-			isFrodoRevealed,
-			currentCorruptionLvl)
-		isFrodoRevealed = false
+			IsFrodoRevealed,
+			CurrCorruptionLvl)
+
+		if isGameOver(CurrMordorPosition, CurrCorruptionLvl) {
+			break
+		}
 	}
-	spew.Dump(huntPool)
+	spew.Dump(HuntPool)
 }
