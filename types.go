@@ -1,6 +1,19 @@
 package main
 
-import "strings"
+import (
+	"fmt"
+	"strings"
+)
+
+//go:generate stringer -type=FspPositionType
+
+type FspPositionType int
+
+const (
+	// FspPositionTypes
+	OutMordor FspPositionType = 0
+	InMordor  FspPositionType = 1
+)
 
 type HuntTile struct {
 	Dmg  int
@@ -23,26 +36,41 @@ func (h *HuntTile) Init(dmg int, name string) {
 
 }
 
-type CharDiceNeededTable struct {
-	Results []struct {
-		NumCharDie int
-		Frequency  int
-		Sum        int
-	}
+type Result struct {
+	Frequency int
+	Sum       int
 }
 
-type CorruptionInflictedTable struct {
-	Results []struct {
-		NumCorruptionInflicted int
-		Frequency              int
-		Sum                    int
-	}
+type FspPosition struct {
+	CurrPosition int
+	ModeType     FspPositionType
 }
 
-type RevealsTable struct {
-	Results []struct {
-		NumReveals int
-		Frequency  int
-		Sum        int
+type ResultTable map[int]*Result
+
+func (t ResultTable) RegisterResult(value int) error {
+	for i := 0; i <= value; i++ {
+		if _, ok := t[i]; !ok {
+			t[i] = &Result{}
+		}
 	}
+	result := t[value]
+	result.Frequency += 1
+	return nil
+}
+
+func (t ResultTable) ToString(name string) string {
+	s := "+" + strings.Repeat("-", 32) + "+"
+	s += fmt.Sprintf("\n| %10s | %7s | %7s |", name, "Freq.", "Sum")
+	for i := 0; i < len(t); i++ {
+		s += fmt.Sprintf("\n| %10d | %7d | %7d |", i, t[i].Frequency, t[i].Sum)
+	}
+	s += "\n+" + strings.Repeat("-", 32) + "+"
+	return s
+}
+
+type TotalResultContainer struct {
+	CorruptionTable ResultTable
+	CharTable       ResultTable
+	RevealTable     ResultTable
 }
