@@ -29,7 +29,7 @@ func (h *HuntTile) GetDmg(numHits int) int {
 }
 
 func (h *HuntTile) IsReveal() bool {
-	return h.Name == "eye" || strings.HasSuffix(h.Name, "r")
+	return h.Name == "eye" || (strings.HasSuffix(h.Name, "r") && !isGollumGuide)
 }
 
 func (h *HuntTile) Init(dmg int, name string) {
@@ -62,8 +62,10 @@ func (t ResultTable) RegisterResult(value int) error {
 func (t ResultTable) ToString(name string) string {
 	s := "+" + strings.Repeat("-", 32) + "+"
 	s += fmt.Sprintf("\n| %10s | %7s | %7s |", name, "Freq.", "Sum")
+	sum := 0
 	for i := 0; i < len(t); i++ {
-		s += fmt.Sprintf("\n| %10d | %7d | %7d |", i, t[i].Frequency, t[i].Sum)
+		sum += t[i].Frequency
+		s += fmt.Sprintf("\n| %10d | %7d | %7d |", i, t[i].Frequency, sum)
 	}
 	s += "\n+" + strings.Repeat("-", 32) + "+"
 	return s
@@ -73,4 +75,7 @@ type TotalResultContainer struct {
 	CorruptionTable ResultTable
 	CharTable       ResultTable
 	RevealTable     ResultTable
+	AttacksTable    ResultTable
+	RolledEyesTable ResultTable
+	TurnsTable      ResultTable
 }

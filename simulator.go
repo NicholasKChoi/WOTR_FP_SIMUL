@@ -35,6 +35,9 @@ func (s *Simulator) PrintResult() error {
 	fmt.Println(s.Results.CharTable.ToString("CharDice"))
 	fmt.Println(s.Results.CorruptionTable.ToString("Corrupt"))
 	fmt.Println(s.Results.RevealTable.ToString("Reveal"))
+	fmt.Println(s.Results.AttacksTable.ToString("Attacks"))
+	fmt.Println(s.Results.RolledEyesTable.ToString("RolledEyes"))
+	fmt.Println(s.Results.TurnsTable.ToString("Turns"))
 	return nil
 }
 
@@ -43,6 +46,9 @@ func (s *Simulator) setupResults() error {
 		CorruptionTable: make(map[int]*Result),
 		CharTable:       make(map[int]*Result),
 		RevealTable:     make(map[int]*Result),
+		RolledEyesTable: make(map[int]*Result),
+		AttacksTable:    make(map[int]*Result),
+		TurnsTable:      make(ResultTable),
 	}
 	return nil
 }
